@@ -20,7 +20,9 @@ Las probé en mi **TCL BeyondTV con Android TV 11** (firmware AR05, `V8-R851T02-
 - **El canal:** leo el canal actual del sistema de TV de TCL (`com.tcl.tvmanager.TTvChannelManager`, por reflexión;
   en teles que no lo tienen simplemente se omite) y lo cruzo con la lista de canales de Android por su
   identificador **y por nombre**. Lo hice así porque en la TDT chilena varios canales comparten el mismo
-  identificador (MEGA, TV+ y Bío Bío: `1/1/32`). Si no lo encuentra, usa `live_preview_fallback` (por ejemplo `7.1`).
+  identificador (MEGA, TV+ y Bío Bío: `1/1/32`). Si no lo encuentra, usa el canal de respaldo
+  `live_preview_fallback`: en mi tele es el `7.1`, **TVN HD** (¡aguante la televisión pública de Chile, y
+  protejámosla!).
 - **El video:** lo dibujo con un `TvView` encima del cuadro. Una capa con la imagen del propio cuadro lo cubre y se
   desvanece cuando el sintonizador avisa que hay video.
 - **Sin internet:** el launcher sigue sin permiso de internet. El único permiso que agregué es `READ_TV_LISTINGS`,
