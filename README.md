@@ -1,3 +1,28 @@
+# 📺 Limpia mi TV
+
+**Limpia mi TV** es mi versión de [cleanyourtv](https://github.com/Gathin23/cleanyourtv), el proyecto de
+[Gathin23](https://github.com/Gathin23) para limpiar teles Android y darles una pantalla de inicio estilo Apple TV.
+
+Partí de su proyecto y le agregué las ideas que tenía para mi tele, una **TCL BeyondTV con Android TV 11**:
+
+- 📡 **Vista previa de TV en vivo:** al dejar seleccionado el cuadro de TV en vivo, el último canal de antena se ve
+  dentro del cuadro, con audio.
+- 🎛️ **TV en vivo siempre en antena**, aunque lo último que usaste haya sido un HDMI.
+- 🗂️ **Categorías:** "Streaming y video", "Música" y "Otras", cada una en su propia fila.
+
+![Categorías en la pantalla de inicio](docs/switches/grid_categories.jpg)
+
+👉 **[Cómo funciona, cómo instalarlo y qué archivos hice yo](VISTA-PREVIA-TCL.md)**
+
+*In English: Limpia mi TV is joaco2v's take on Gathin23/cleanyourtv, adding a live TV preview inside the Live TV
+tile, a Live TV tile that always opens the antenna, and grid categories. Details, in Spanish first, in
+[VISTA-PREVIA-TCL.md](VISTA-PREVIA-TCL.md).*
+
+> Gracias a Gathin23 y a la comunidad de cleanyourtv: todo lo que sigue más abajo es su documentación original.
+> Licencia MIT.
+
+---
+
 <p align="center">
   <a href="https://cleanyour.tv"><img src="https://raw.githubusercontent.com/Gathin23/cleanyourtv/main/docs/banner.png" alt="CleanYourTV. Your TV, minus the ads. Strip the bloatware from any Android TV or Google TV over Wi-Fi and replace the ad-filled home screen with a clean launcher that looks like an Apple TV. No root, no cable, nothing uninstalled, and a one-line restore." width="800"></a>
 </p>

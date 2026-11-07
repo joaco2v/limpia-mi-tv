@@ -1,4 +1,4 @@
-# Vista previa de TV en vivo y categorías para TCL BeyondTV
+# Limpia mi TV: vista previa de TV en vivo y categorías para TCL BeyondTV
 
 *Este proyecto está documentado primero en español. A short summary in English is at the end.*
 
@@ -69,6 +69,25 @@ Android TV 11** (AR05 firmware, Latin America, Realtek RTD2851), that adds:
 - **Grid categories:** titled groups of apps, each on its own row, with exact D-pad navigation.
 
 No `INTERNET` permission; the only new permission is `READ_TV_LISTINGS`.
+
+## Autoría
+
+Este repositorio es una copia (fork) de [cleanyourtv](https://github.com/Gathin23/cleanyourtv), porque la pantalla
+de inicio necesita el proyecto completo para compilarse. **El aporte de [joaco2v](https://github.com/joaco2v)
+es lo siguiente:**
+
+| Archivo | Qué es |
+|---|---|
+| [`LivePreview.java`](launcher/app/src/main/java/com/gathin/tvhome/LivePreview.java) | **Nuevo.** La vista previa de TV en vivo dentro del cuadro y la apertura de la antena |
+| [`CategoryDecoration.java`](launcher/app/src/main/java/com/gathin/tvhome/CategoryDecoration.java) | **Nuevo.** Los títulos de categoría en la cuadrícula |
+| `AppAdapter.java`, `MainActivity.java`, `AndroidManifest.xml` | **Cambios** para conectar las funciones nuevas: agrupar por categoría, navegación con espacios vacíos, abrir la antena y el permiso para leer canales |
+| `config.xml` | **Cambios:** las opciones nuevas y la configuración de la TCL BeyondTV |
+| `VISTA-PREVIA-TCL.md`, la portada del `README.md` y su documentación | **Nuevos** |
+
+Todo lo demás (la limpieza de la tele, las herramientas, el resto de la pantalla de inicio y su documentación) es
+del proyecto original de [Gathin23](https://github.com/Gathin23) y sus colaboradores. Para ver exactamente qué
+cambió, compara este repositorio con el original:
+[Limpia mi TV vs cleanyourtv](https://github.com/Gathin23/cleanyourtv/compare/main...joaco2v:limpia-mi-tv:main).
 
 ## Licencia / License
 
