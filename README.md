@@ -12,9 +12,9 @@ Partí de su proyecto y le agregué las ideas que tenía para mi tele, una **TCL
 
 ![Categorías en la pantalla de inicio](docs/switches/grid_categories.jpg)
 
-👉 **[Cómo funciona, cómo instalarlo y qué archivos hice yo](VISTA-PREVIA-TCL.md)**
+👉 **[Cómo funciona, cómo instalarlo y qué archivos hice](VISTA-PREVIA-TCL.md)**
 
-*In English: Limpia mi TV is joaco2v's take on Gathin23/cleanyourtv, adding a live TV preview inside the Live TV
+*In English: Limpia mi TV is my take on Gathin23/cleanyourtv. I added a live TV preview inside the Live TV
 tile, a Live TV tile that always opens the antenna, and grid categories. Details, in Spanish first, in
 [VISTA-PREVIA-TCL.md](VISTA-PREVIA-TCL.md).*
 
