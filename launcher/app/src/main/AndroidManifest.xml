@@ -21,6 +21,8 @@
     <!-- YaOS (Yandex TV OS): HDMI, AV and the tuner all play in com.yandex.tv.live, whose activities require
          this permission (protection level normal, so it is granted at install). Ignored on other TVs. -->
     <uses-permission android:name="yandex.tv.permission.ACCESS_TV_SOURCE" />
+    <!-- live_preview: leer la lista de canales de antena (se concede con pm grant al instalar). -->
+    <uses-permission android:name="android.permission.READ_TV_LISTINGS" />
 
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
@@ -77,6 +79,9 @@
         android:theme="@style/Theme.TvHome"
         android:allowBackup="false"
         android:localeConfig="@xml/locales_config">
+
+        <!-- live_preview: canal actual del middleware de TCL; opcional, otras teles no lo tienen. -->
+        <uses-library android:name="com.tcl.tvmanager" android:required="false" />
 
         <activity
             android:name=".MainActivity"

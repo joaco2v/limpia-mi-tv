@@ -120,6 +120,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private static final long TIME_VALID_AFTER_MS = 1_735_689_600_000L;
     private String liveTvPkg;
     private boolean homeIgnoreChannelKeys;
+    /** live_preview (config.xml): the last antenna channel inside the Live TV tile; null when off. */
+    private LivePreview livePreview;
     /** Launcher settings' change count this Home was built with (see onResume). */
     private long settingsRevision;
     /** Idle time on Home before ClockActivity; 0 is off (config.xml, home_idle_clock_minutes). */
@@ -513,6 +515,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         glass = findViewById(R.id.glass);
         glass.setStyle(cfg.glassStyle);
         if (festive) glass.setAccent(festival.accentColor());
+        if (getResources().getBoolean(R.bool.live_preview) && liveTvPkg != null && !liveTvPkg.isEmpty()) {
+            livePreview = new LivePreview(this, root, liveTvPkg, getString(R.string.live_preview_fallback),
+                    getResources().getInteger(R.integer.live_preview_delay_ms), density);
+            root.getViewTreeObserver().addOnGlobalFocusChangeListener((was, now) -> livePreview.onFocusMoved(now));
+        }
         ambient = findViewById(R.id.ambient);
         // The glow is one bitmap, so its alpha can be applied while drawing it. Otherwise every frame of
         // a fade renders it into a full-screen offscreen buffer first.
@@ -650,7 +657,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     return true;
                 }
                 if (dockRow && getPosition(child) < COLUMNS) return false;
-                int top = child.getTop() + rect.top;
+                // From the top of the row's decoration, so a category title above the row scrolls in with it.
+                int top = child.getTop() + rect.top - getTopDecorationHeight(child);
                 int bottom = top + rect.height();
                 // A row already fully on screen stays put, even inside the bottom padding (the last row
                 // rows_below_dock leaves visible ends there; nudging it up was the bug). A row that has to scroll
@@ -692,6 +700,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     AnimationUtils.loadAnimation(this, R.anim.tile_enter), 0.06f));
         }
         adapter = new AppAdapter(this, this, COLUMNS, cfg);
+        if (dockRow && !singleRow && getResources().getStringArray(R.array.grid_categories).length > 0) {
+            grid.addItemDecoration(new CategoryDecoration(this, adapter, COLUMNS, density));
+        }
         dockApps = cfg.dockApps;
         fillDockLeavesSlots = !cfg.fillDock;
         Order savedOrder = Order.load(Order.file(this));
@@ -1305,6 +1316,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // Only Home's own share is dropped: a key service that saw the same DOWN keeps its hold.
         RemoteKeys.release(this);
         cancelHoldOk();
+        if (livePreview != null) livePreview.stop();   // frees the tuner before the Live TV app (or any app) needs it
         root.removeCallbacks(showIdleClock);
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
@@ -1797,6 +1809,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     public void onTileFocused(int position, View card) {
         lastFocused = position;
+        if (livePreview != null) {
+            livePreview.onTileFocused(card, adapter.packageAt(position), adapter.artworkAt(position), adapter.focusScale());
+        }
         lastFocusedKey = adapter.keyAt(position);
         // Focus restored before the first layout (cold start): the tile has no size yet, and the glass
         // would be sized to 2*pad. Run again once the tile is laid out.
@@ -2446,6 +2461,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 focusLibrary();
                 return true;
             }
+            // A category's last row ends at its last app: the gap slots after it take no focus.
+            if (forward && !rtlAppGrid && adapter.isCategoryGapAt(position + 1)) return true;
             // In the dock, the last app is the row's end: the empty slots after it take no focus.
             int rowCount = position < COLUMNS ? Math.min(count, adapter.dockFilled()) : count;
             return GridNavigation.atHorizontalEdge(position, rowCount, COLUMNS,

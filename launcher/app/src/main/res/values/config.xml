@@ -17,11 +17,47 @@
 
     <!-- Apps pinned to the dock row at the bottom, in this order. Missing apps are skipped. -->
     <string-array name="dock_apps">
+        <!-- Dock (5): TV en vivo primero, luego streaming -->
+        <item>com.tcl.tv</item>
+        <item>com.directv.dtvlatam</item>
         <item>com.netflix.ninja</item>
         <item>com.amazon.amazonvideo.livingroom</item>
         <item>com.google.android.youtube.tv</item>
-        <item>in.startv.hotstar</item>
+        <!-- Grilla: streaming y video -->
+        <item>com.disney.disneyplus</item>
+        <item>com.wbd.stream</item>
+        <item>com.apple.atve.androidtv.appletv</item>
+        <item>com.cbs.ca</item>
+        <item>com.crunchyroll.crunchyroid</item>
+        <item>tv.pluto.android</item>
+        <item>tv.twitch.android.app</item>
+        <item>com.kick.mobile</item>
+        <item>com.tcl.ui_mediaCenter</item>
+        <!-- Grilla: musica -->
+        <item>com.google.android.youtube.tvmusic</item>
+        <item>com.spotify.tv.android</item>
+        <!-- Grilla: otras -->
+        <item>com.android.vending</item>
+        <item>com.esaba.downloader</item>
+        <item>com.tcl.MultiScreenInteraction_TV</item>
+        <item>com.tcl.dashboard</item>
     </string-array>
+    <!-- Categorias de la grilla (bajo el dock): "Titulo|paquete,paquete,...". Cada categoria empieza en su propia
+         fila con su titulo encima. "*" junta las apps que no estan en ninguna otra. Vacio: grilla sin categorias. -->
+    <string-array name="grid_categories" translatable="false">
+        <item>Streaming y video|com.disney.disneyplus,com.wbd.stream,com.kick.mobile,com.apple.atve.androidtv.appletv,com.cbs.ca,com.crunchyroll.crunchyroid,tv.pluto.android,tv.twitch.android.app,com.tcl.ui_mediaCenter,com.directv.dtvlatam,com.netflix.ninja,com.amazon.amazonvideo.livingroom,com.google.android.youtube.tv</item>
+        <item>Música|com.google.android.youtube.tvmusic,com.spotify.tv.android</item>
+        <item>Otras|*</item>
+    </string-array>
+
+    <!-- Vista previa en vivo: con el cuadro de live_tv_package enfocado un momento, el ultimo canal de antena se ve
+         dentro del cuadro, con audio. Si no se sabe el ultimo canal, usa live_preview_fallback (numero del canal). -->
+    <bool name="live_preview">true</bool>
+    <string name="live_preview_fallback" translatable="false">7.1</string>
+    <integer name="live_preview_delay_ms">700</integer>
+    <!-- El cuadro de TV en vivo abre siempre la antena (en su ultimo canal), no la ultima entrada usada (p. ej. HDMI). -->
+    <bool name="live_tv_tile_antenna">true</bool>
+
     <!-- With fewer dock_apps than columns (or a dock app that is not installed), the free dock slots take
          the first grid apps, so the dock never shows a gap. false leaves them empty (#162); a theme can
          set "fill_dock": false. -->
@@ -29,12 +65,11 @@
 
     <!-- Apps never shown as tiles (e.g. the Live TV app, which the Inputs menu already covers). -->
     <string-array name="hidden_apps">
-        <item>com.mediatek.wwtv.tvcenter</item>
-        <item>com.mitv.gallery</item>
+        <item>com.tcl.partnercustomizer</item>
     </string-array>
 
     <!-- The TV's Live TV / tuner app, offered at the end of the Inputs menu. Leave empty to omit. -->
-    <string name="live_tv_package" translatable="false">com.mediatek.wwtv.tvcenter</string>
+    <string name="live_tv_package" translatable="false">com.tcl.tv</string>
 
     <!-- Open the Live TV app above the first time Home comes up after the TV is switched on, for sets that are
          mostly used for broadcast TV. Once per boot: Home after that stays Home. Can also be set with
@@ -72,7 +107,7 @@
          the Live TV app normally instead of selecting a different input. A wrong but registered ID
          can open the app's tuner setup screen instead; that is not detected as a fallback condition.
          Use a verified input ID, or leave this empty. See docs/devices/haam-r4.md. -->
-    <string name="live_tv_input_id" translatable="false"></string>
+    <string name="live_tv_input_id" translatable="false">com.tcl.tvinput/.TDTVInputService/HW1413742848</string>
 
     <!-- Tiles that open a screen of the app instead of its start screen: "package=action", sent to that package.
          A tile whose action no longer resolves opens the app normally. MagentaTV's program guide:
@@ -86,6 +121,7 @@
 
     <!-- A tile's name instead of the app's own: "package=Name". It also shows above the dock. -->
     <string-array name="app_labels">
+        <item>com.tcl.tv=TV en vivo</item>
     </string-array>
     <!-- A tile's artwork instead of the app's banner: "package=drawable", a banner_* drawable bundled with the
          launcher (res/drawable). banner_tv is a magenta field with the Live TV glyph. -->
@@ -402,7 +438,7 @@
 
     <!-- Tiles per row in the grid; the dock always has this many slots. Tiles are 180dp wide at 4 columns and
          shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a 1080p TV). -->
-    <integer name="columns">4</integer>
+    <integer name="columns">5</integer>
 
     <!-- Basic motion is on; advanced effects are opt-in in the launcher's own Settings screen. -->
     <bool name="animations">true</bool>

@@ -196,6 +196,15 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private final boolean fillDock;
     /** Dock apps found at the last reload, and the empty slots after them. */
     private int docked, emptySlots;
+    /** grid_categories (config.xml): titles and their packages, in order; "*" marks the category for the rest. */
+    private final List<String> categoryTitles = new ArrayList<>();
+    private final List<Set<String>> categoryPkgs = new ArrayList<>();
+    private int restCategory = -1;
+    /** Grid row -> title of the category that starts on it, from the last reload. */
+    private final Map<Integer, String> headerRows = new HashMap<>();
+    /** live_tv_tile_antenna (config.xml): the Live TV tile (live_tv_package) always opens the antenna tuner. */
+    private final boolean liveTvAntenna;
+    private final String liveTvPkg;
     /** Never shown as tiles (res/values/config.xml, hidden_apps). */
     private final Set<String> hidden;
     /** Apps pre-seeded into the App library's "added" set (config.xml library_apps); empty by default. */
@@ -248,6 +257,20 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         this.appLabels = cfg.appLabels;
         this.appBanners = cfg.appBanners;
         this.uniformTiles = cfg.uniformTiles;
+        this.liveTvPkg = cfg.liveTvPackage == null ? "" : cfg.liveTvPackage;
+        this.liveTvAntenna = ctx.getResources().getBoolean(R.bool.live_tv_tile_antenna);
+        for (String item : ctx.getResources().getStringArray(R.array.grid_categories)) {
+            int bar = item.indexOf('|');
+            if (bar <= 0) continue;
+            Set<String> pkgs = new HashSet<>();
+            for (String p : item.substring(bar + 1).split(",")) {
+                p = p.trim();
+                if (p.equals("*")) restCategory = categoryTitles.size();
+                else if (!p.isEmpty()) pkgs.add(p);
+            }
+            categoryTitles.add(item.substring(0, bar).trim());
+            categoryPkgs.add(pkgs);
+        }
         // Tiles keep their identity across reload(), so a focused tile stays on its app instead of
         // its view being rebound to whatever app now sits in that slot.
         setHasStableIds(true);
@@ -339,6 +362,10 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         for (int i = 0; i < emptySlots; i++) {
             fresh.add(docked + i, new Entry(Entry.EMPTY, "", new ComponentName(ctx, "empty-dock-slot-" + i),
                     null, null, null, 0));
+        }
+        headerRows.clear();
+        if (!categoryTitles.isEmpty() && dockRow && !singleRow && !reordering && fresh.size() > dockSize) {
+            groupByCategory(fresh);
         }
         items.clear();
         items.addAll(fresh);
@@ -539,6 +566,20 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         // TV apps launch with the same leanback intent as from the stock launcher or the remote, so an app
         // already running resumes instead of restarting; only phone apps added from the library use plain MAIN.
         if (leanbackPackages.contains(e.pkg)) i.addCategory(Intent.CATEGORY_LEANBACK_LAUNCHER);
+        // live_tv_tile_antenna: the Live TV tile opens the antenna tuner (on its last channel) rather than whatever
+        // input the Live TV app was on last, e.g. an HDMI port. A fresh task, or a running app would only come to
+        // the front and ignore the request.
+        if (liveTvAntenna && e.pkg.equals(liveTvPkg)) {
+            String tuner = LivePreview.findTuner(ctx);
+            if (tuner != null) {
+                Intent antenna = new Intent(Intent.ACTION_VIEW)
+                        .setDataAndType(android.media.tv.TvContract.buildChannelsUriForInput(tuner),
+                                android.media.tv.TvContract.Channels.CONTENT_TYPE)
+                        .setPackage(e.pkg)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                if (ctx.getPackageManager().resolveActivity(antenna, 0) != null) i = antenna;
+            }
+        }
         String action = launchActions.get(e.pkg);
         String inputId = LaunchActions.inputId(action);
         if (inputId != null) {
@@ -655,9 +696,56 @@ public class AppAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return emptySlots > 0 ? docked : dockSize;
     }
 
-    /** A position focus can land on: an empty dock slot gives the last dock app. */
+    /**
+     * grid_categories: the grid tiles (after the dock row) regrouped by category, in each group's existing order.
+     * Every category but the last is padded with empty slots to a whole row, so the next one starts on its own
+     * row and Up/Down keep moving exactly one row. The title of each group is drawn by CategoryDecoration.
+     */
+    private void groupByCategory(List<Entry> fresh) {
+        int n = categoryTitles.size();
+        int fallback = restCategory >= 0 ? restCategory : n - 1;
+        List<List<Entry>> groups = new ArrayList<>();
+        for (int i = 0; i < n; i++) groups.add(new ArrayList<>());
+        for (Entry e : fresh.subList(dockSize, fresh.size())) {
+            int idx = fallback;
+            for (int i = 0; i < n; i++) {
+                if (categoryPkgs.get(i).contains(e.pkg)) { idx = i; break; }
+            }
+            groups.get(idx).add(e);
+        }
+        int lastGroup = -1;
+        for (int i = 0; i < n; i++) if (!groups.get(i).isEmpty()) lastGroup = i;
+        List<Entry> out = new ArrayList<>(fresh.subList(0, dockSize));
+        int gap = 0;
+        for (int i = 0; i <= lastGroup; i++) {
+            List<Entry> g = groups.get(i);
+            if (g.isEmpty()) continue;
+            headerRows.put(out.size() / dockSize, categoryTitles.get(i));
+            out.addAll(g);
+            if (i == lastGroup) break;
+            while (out.size() % dockSize != 0) {
+                out.add(new Entry(Entry.EMPTY, "", new ComponentName(ctx, "category-gap-" + gap++), null, null, null, 0));
+            }
+        }
+        fresh.clear();
+        fresh.addAll(out);
+    }
+
+    /** Title of the category that starts on this grid row, or null. */
+    String categoryTitleForRow(int row) {
+        return headerRows.get(row);
+    }
+
+    /** An empty slot that pads a category's last row (never one of the dock's own empty slots). */
+    boolean isCategoryGapAt(int position) {
+        return position >= dockSize && position < items.size() && items.get(position).kind == Entry.EMPTY;
+    }
+
+    /** A position focus can land on: an empty dock slot gives the last dock app, a category gap the tile before it. */
     int focusablePosition(int position) {
-        return DockSlots.focusable(position, docked, emptySlots);
+        int p = DockSlots.focusable(position, docked, emptySlots);
+        while (isCategoryGapAt(p)) p--;
+        return p;
     }
 
     String labelAt(int position) {

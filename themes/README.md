@@ -89,6 +89,11 @@ A new key needs one there in the same pull request.
 | `fill_dock` | bool | Fill the dock slots `dock_apps` leaves free with the first grid apps (true by default); false leaves them empty |
 | `hidden_apps` | list of package names | Never shown as tiles |
 | `live_tv_package`, `live_tv_action` | string | The Live TV app and, if it has no leanback entry, the action to start it with |
+| `grid_categories` | string array (config.xml only) | Grid categories under the dock: each item is `Title\|package,package,...`; `*` collects every app no other category names. Each category starts on its own row with its title above it (empty slots pad the row before it), so Up/Down still move one row. Empty: no categories |
+| `live_preview` | bool (config.xml only) | While the `live_tv_package` tile stays focused, the last antenna channel plays inside the tile with sound; focus leaving the tile or Home pausing frees the tuner. Needs `READ_TV_LISTINGS` (`pm grant`). Tested on TCL BeyondTV, Android TV 11 (AR05) |
+| `live_preview_fallback` | string (config.xml only) | Display number of the channel `live_preview` shows when the last channel is unknown, e.g. `7.1` |
+| `live_preview_delay_ms` | integer (config.xml only) | How long the Live TV tile stays focused before `live_preview` starts, in ms |
+| `live_tv_tile_antenna` | bool (config.xml only) | The Live TV tile opens the antenna tuner on its last channel instead of the input the Live TV app used last (e.g. HDMI) |
 | `live_tv_input_id` | string | Live TV source for the Inputs menu: an exact system tuner ID opens its channel collection. The special value `content://android.media.tv/channel` opens the stock launcher's root channel URI on Xiaomi MiTV-MSSP1 (#1941). Empty keeps automatic selection. Missing input or unsupported collection falls back to the app's normal launch. [HAAM satellite example](../docs/devices/haam-r4.md) |
 | `source_panel_service`, `source_panel_action` | string | The TV's own source panel, for sets with no TvInputManager: a service, or an activity (BYINTEK U4). Without a Live TV app, the Inputs pill opens it directly |
 | `source_panel_extra` | `"name=value"` | One int extra sent with the source panel (Coocaa OS: `control_center_command=100`) |
